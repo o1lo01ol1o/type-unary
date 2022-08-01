@@ -14,10 +14,10 @@
 -- Module      :  TypeUnary.Vec
 -- Copyright   :  (c) Conal Elliott 2009
 -- License     :  BSD3
--- 
+--
 -- Maintainer  :  conal@conal.net
 -- Stability   :  experimental
--- 
+--
 -- Experiment in length-typed vectors
 ----------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ import Data.Typeable (Typeable)
 import Foreign.Storable
 import Foreign.Ptr (Ptr,plusPtr,castPtr)
 
-import Control.Newtype (Newtype(..))
+import Control.Newtype.Generics (Newtype(..))
 
 -- import Data.Constraint
 
@@ -71,7 +71,7 @@ infixr 5 :<
 -- | Vectors with type-determined length, having empty vector ('ZVec') and
 -- vector cons ('(:<)').
 data Vec :: * -> * -> * where
-  ZVec :: Vec Z a 
+  ZVec :: Vec Z a
   (:<) :: a -> Vec n a -> Vec (S n) a
  deriving Typeable
 
@@ -136,7 +136,7 @@ instance Ord a => Ord (Vec n a) where
 --   _ `compare` _ = cantV "compare"
 
 -- Equivalently,
--- 
+--
 --   (a :< as) `compare` (b :< bs) =
 --     case a `compare` b of
 --       LT -> LT
@@ -144,12 +144,12 @@ instance Ord a => Ord (Vec n a) where
 --       EQ -> as `compare` bs
 
 -- Some alternatives:
--- 
+--
 --   (==*) :: (IsNat n, Eq a) => Vec n a -> Vec n a -> Bool
 --   (==*) = (fmap.fmap) and (liftA2 (==))
---   
+--
 --   -- as ==* bs = and (liftA2 (==) as bs)
---   
+--
 --   compare' :: (IsNat n, Ord a) => Vec n a -> Vec n a -> Ordering
 --   compare' = (fmap.fmap) fold (liftA2 compare)
 
@@ -219,7 +219,7 @@ applyV (Succ n) = inVecS2 (\ (f,fs) (x,xs) -> (f x , applyV n fs xs))
 -- -fno-warn-incomplete-patterns above. Otherwise we get warnings about
 -- non-exhaustive pattern matches, although the other possibilities are
 -- type-incorrect. Once upon a time SLPJ said
--- 
+--
 --   The overlap warning checker simply doesn't take account of GADTs.
 --   There's a long-standing project suggestion to fix this:
 --   http://hackage.haskell.org/trac/ghc/wiki/ProjectSuggestions .
@@ -300,7 +300,7 @@ peekV' (Succ n) p =  do a  <- peek p
 
 -- peekV' (Succ n) p = liftA2 (:<) (peek p) (peekV (succPtr p))
 --                   = liftA2 (:<) peek (peekV (succPtr p))
--- 
+--
 -- peekV' (Succ _) = (liftA2.liftA2) (:<) peek (peekV . succPtr)
 
 pokeV' :: Storable a => Nat n -> Ptr a -> Vec n a -> IO ()
@@ -406,9 +406,9 @@ un4 (a :< b :< c :< d :< ZVec) = (a,b,c,d)
 --   infixr 5 <|
 --   (<|) :: a -> a -> Vec2 a
 --   (<|) = vec2
--- 
+--
 -- So we can say things like
--- 
+--
 --   a :< b <| c
 
 {--------------------------------------------------------------------
@@ -504,19 +504,19 @@ split' (Succ n) (a :< as) = (a :< bs, cs)
 -- split' _ _ = cantV "split"
 
 -- For instance,
--- 
+--
 --   *TypeUnary.Vec> split (pure 3) :: (Vec7 Int, Vec4 Int)
 --   (elemsV [3,3,3,3,3,3,3],elemsV [3,3,3,3])
--- 
+--
 -- Note that 'pure 3' was inferred to have type 'Vec11 Int'.
 
 -- I'd like to define take & drop similarly, e.g.,
 --
 --   take :: IsNat n => Vec (n :+: m) a -> Vec n a
 --   take = fst . split
--- 
+--
 -- However,
--- 
+--
 --   Could not deduce ((n :+: m0) ~ (n :+: m))
 --   from the context (IsNat n)
 --     bound by the type signature for
@@ -562,7 +562,7 @@ lengthV (a :< as) = Succ (lengthV as)
 
 -- resplit :: (Vec m a, Vec n a) -> (Vec n a, Vec m a)
 -- resplit (u,v) = split (u <+> v)
--- 
+--
 -- Won't type-check without commutativity of addition. :(
 
 #if 0
@@ -675,7 +675,7 @@ unzipV ((a,b) :< ps) = (a :< as, b :< bs) where (as,bs) = unzipV ps
 -- | Unzip a vector of pairs into a pair of vectors
 unzipV3 :: Vec n (a,b,c) -> (Vec n a, Vec n b, Vec n c)
 unzipV3 ZVec = (ZVec,ZVec,ZVec)
-unzipV3 ((a,b,c) :< ps) = (a :< as, b :< bs, c :< cs) 
+unzipV3 ((a,b,c) :< ps) = (a :< as, b :< bs, c :< cs)
   where (as,bs,cs) = unzipV3 ps
 
 -- | Cross-product of two vectors, in the set-theory sense, not the geometric
@@ -720,7 +720,7 @@ result = (.)
 -- Generate bogus (error-producing) Enum
 #define INSTANCE_Enum
 
-#define CONSTRAINTS IsNat n, 
+#define CONSTRAINTS IsNat n,
 
 #define APPLICATIVE Vec n
 #include "ApplicativeNumeric-inc.hs"
